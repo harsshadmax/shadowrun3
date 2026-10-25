@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shadowrun"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi", "uvicorn", "pydantic>=2", "docker", "pyyaml", "jinja2",
+  "httpx", "packaging","pypiserver", "build", "setuptools", "wheel", "pytest",
+]
+
+[project.scripts]
+shadowrun = "shadowrun.cli:main"
+
+[tool.setuptools]
+packages = ["shadowrun"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

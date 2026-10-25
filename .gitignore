@@ -1,0 +1,10 @@
+.data/
+.venv/
+__pycache__/
+*.egg-info/
+shadowrun.db*
+packages/dist/*
+!packages/dist/.gitkeep
+.env
+# generated frames of the demo replay (the GIF itself is kept)
+evidence/*.png
