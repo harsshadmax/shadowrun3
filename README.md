@@ -10,6 +10,23 @@ runs the package inside a locked-down sandbox full of fake secrets, watches what
 > Everything is a **simulation**: the packages, the agent and the secrets are fake, and payloads can only reach a
 > sink container inside an internal Docker network. Nothing touches a real host.
 
+[![CI](https://github.com/harsshadmax/shadowrun2.0/actions/workflows/ci.yml/badge.svg)](https://github.com/harsshadmax/shadowrun2.0/actions/workflows/ci.yml)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
+
+## At a glance
+
+| | |
+|---|---|
+| **Problem** | AI coding agents install packages on their own. A malicious package can read secrets or call out to an attacker the moment it installs, before any human looks. |
+| **Idea** | Make the install earn its place: run it first in a sandbox of fake secrets, record the system calls, and let a deterministic policy decide. |
+| **Result (simulated benchmark)** | Unguarded: 0 of 3 attacks stopped. Package-name check: 1 of 3. Shadow-Run: 2 of 3, with 0 of 3 safe packages blocked. The one miss (a time bomb) is documented. |
+| **Agent loop** | The agent is blocked with evidence, picks another package, and finishes the task (`/demo`). |
+| **Built for** | Ziroh Agentic AI Hackathon. |
+
+Where to look next: [architecture](#2-the-system-at-a-glance) · [benchmark](#9-benchmark) · [acceptance checklist](ACCEPTANCE.md) ·
+[raw validation evidence](evidence/README.md).
+
 ## Quick start: from a fresh clone to the dashboard
 
 About 10 minutes the first time (most of it is downloading Docker images). You need **Windows 11 with WSL2 and an
@@ -511,7 +528,7 @@ flowchart LR
 |---|---|---|---|---|---|
 | no_guard | 0 of 3 | 0 of 3 | 3 | n/a | n/a |
 | name_check | 1 of 3 (the typosquat) | 0 of 3 | 1 | n/a | n/a |
-| shadowrun | 2 of 3 (the time bomb slips through) | 0 of 3 | 0 | 5.4 s | 5.7 s |
+| shadowrun | 2 of 3 (the time bomb slips through) | 0 of 3 | 0 | 5.3 s | 5.7 s |
 
 > Small demo benchmark: 6 self-written, simulated packages, 3 runs each. It shows the mechanism works on simulated
 > attacks, not real-world detection rates. Latency is dominated by container start and install time and was measured
@@ -522,7 +539,7 @@ outside its sandbox. The attack it missed is M3. The name check only caught the 
 
 **The hardening has a latency cost, and this is its measurement.** Detection results are identical to the original code
 (2 of 3 attacks stopped, 0 benign stopped), but the median decision time went from **2.6 s** (original, max 3.5 s) to
-**5.4 s** (max 5.7 s). Profiling one scan (isolated, warm; wheel / sdist) shows where it goes:
+**5.3 s** (max 5.7 s). Profiling one scan (isolated, warm; wheel / sdist) shows where it goes:
 
 | Stage | Wheel | Sdist | Note |
 |---|---|---|---|
@@ -541,7 +558,7 @@ network. These runs used a warm doctor status (`gate` ≈ 0 s); a first run afte
 a full doctor check of about 10 s.
 
 The validation behind these numbers names the exact source it tested: commit
-`115b66d933e7a19af6de92e2246e23875b8f4bfe`, source hash `b40f2d4b…6539` (`bash scripts/source_hash.sh` on that commit
+`6783e23ed84cebda7e62fb15a4e3f1a7a593f32b`, source hash `0da2af7e…1d89` (`bash scripts/source_hash.sh` on that commit
 prints the same value), clean working tree, source unchanged during the run. Raw output (environment, doctor, pytest,
 benchmark, audit verify, exit codes) is in [`evidence/validation.log`](evidence/validation.log). The same steps run in
 GitHub Actions (`.github/workflows/ci.yml`) so anyone can reproduce them without trusting that log.
@@ -631,7 +648,7 @@ server, gVisor or Firecracker.
   connects are parsed but not flagged. Symlinks are not resolved. Signals are flagged only when aimed at the sandbox
   init or at every process.
 - `strace --seccomp-bpf` cannot be used when attaching to a running process, so the tracer stops on every syscall of
-  the traced processes. That roughly doubled decision time (2.6 s to 5.4 s median, see section 9) and would hurt more on
+  the traced processes. That roughly doubled decision time (2.6 s to 5.3 s median, see section 9) and would hurt more on
   syscall-heavy packages; the 30 s run timeout then ends in a denied verdict, never an allow.
 - The tracer sidecar is root with `CAP_SYS_PTRACE` (see the residual-risk note in section 4).
 - `sandbox` time is container start plus install, measured together. A first scan after an idle period also

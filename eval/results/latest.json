@@ -1,6 +1,6 @@
 {
   "available": true,
-  "eval_run_id": "1b92c452",
+  "eval_run_id": "e3360929",
   "disclaimer": "Small demo benchmark: 6 self-written, simulated packages, 3 runs each. It shows the mechanism works on simulated attacks, not real-world detection rates. Latency is dominated by container start and install time and was measured on this machine.",
   "rows": [
     {
@@ -30,17 +30,17 @@
       "false_positives": 0,
       "benign_total": 3,
       "leaked_tokens": 0,
-      "median_ms": 5400.371190499982,
-      "max_ms": 5709.860489000221
+      "median_ms": 5313.24066849993,
+      "max_ms": 5710.427055000309
     }
   ],
   "phases": {
-    "gate_ms": 0.028037499987476622,
-    "fetch_ms": 2.858877500102608,
-    "hash_ms": 0.01009750008051924,
-    "sandbox_ms": 4974.406438999836,
-    "analyze_ms": 341.4466354998922,
-    "decide_ms": 2.5168019999455282
+    "gate_ms": 0.02571599998191232,
+    "fetch_ms": 2.6174505001108628,
+    "hash_ms": 0.009819499837249168,
+    "sandbox_ms": 4888.855063499932,
+    "analyze_ms": 341.7990325001483,
+    "decide_ms": 2.4088010000014037
   },
   "matrix": {
     "B1": {

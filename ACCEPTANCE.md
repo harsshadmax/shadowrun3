@@ -5,10 +5,10 @@ Checked on the dev machine (Windows 11, WSL2 Ubuntu 24.04, Docker Engine 29.1.3,
 
 | | |
 |---|---|
-| Commit tested | `115b66d933e7a19af6de92e2246e23875b8f4bfe` (branch `security-fixes-and-redesign`) |
-| Source hash | `b40f2d4b552847be78b908d937d29bd6f8c1ce3c89d0af36461e22bec1e86539` (`bash scripts/source_hash.sh` on that commit prints the same value; docs and generated evidence are excluded from it) |
+| Commit tested | `6783e23ed84cebda7e62fb15a4e3f1a7a593f32b` (branch `security-fixes-and-redesign`) |
+| Source hash | `0da2af7ee8e9b549eda4572c0b5ae51888e14800c054ffff1e9aa370f4751d89` (`bash scripts/source_hash.sh` on that commit prints the same value; docs and generated evidence are excluded from it) |
 | Working tree | clean when the run started; source hash identical before and after the run |
-| Results | doctor 9/9 PASS, **287 tests passed, none skipped**, 3-repeat benchmark, audit chain OK over 462 entries |
+| Results | doctor 9/9 PASS, **287 tests passed, none skipped**, 3-repeat benchmark, audit chain OK over 626 entries |
 | Raw output | [`evidence/validation.log`](evidence/validation.log), re-runnable with `bash scripts/validate.sh` (refuses a dirty tree) |
 | Independent check | `.github/workflows/ci.yml` rebuilds the sandbox and runs doctor, the full suite (fails if any test is skipped) and the benchmark on GitHub. **It has not run yet**, so this file does not claim it passes |
 
@@ -26,7 +26,7 @@ Checked on the dev machine (Windows 11, WSL2 Ubuntu 24.04, Docker Engine 29.1.3,
 | 10 | M1 and M2 blocked with canary evidence; B1 to B3 allowed | PASS | e2e per manifest; benchmark matrix |
 | 11 | Time bomb slip reported honestly | PASS | M3 ALLOW in every run; stated in README, results notes and demo script |
 | 12 | Agent is blocked, switches package, finishes | PASS | `test_agent_blocked_then_switches_and_finishes`, `evidence/demo_run.txt` |
-| 13 | Audit chain verifies and a tamper is detected | PASS | `tests/test_audit.py`; `audit verify` OK over 462 entries (validation) and 486 (demo run) |
+| 13 | Audit chain verifies and a tamper is detected | PASS | `tests/test_audit.py`; `audit verify` OK over 626 entries (validation) and 486 (demo run) |
 | 14 | Dashboard works end to end; loading/empty/error states | PASS | 35 dashboard tests; redesign driven in the in-app browser (earlier session: 1440, 768, 375 px, no horizontal scroll). The Docker-down error path was exercised only through tests |
 | 15 | Templates are autoescaped (XSS test passes) | PASS | `test_untrusted_strings_are_escaped_everywhere`; no `innerHTML`, no inline handlers (tested) |
 | 16 | Benchmark table has counts, false positives, latency and the disclaimer | PASS | `eval/results/results.md`: no guard 0/3, name check 1/3, Shadow-Run 2/3 attacks stopped, 0/3 benign stopped |
@@ -46,14 +46,14 @@ real captures).
 
 ## Known gaps
 
-- **Latency doubled:** median decision 2.6 s to 5.4 s (max 5.7 s), because `strace --seccomp-bpf` is refused when
+- **Latency doubled:** median decision 2.6 s to 5.3 s (max 5.7 s), because `strace --seccomp-bpf` is refused when
   attaching to a running process. Breakdown in README section 9.
 - M3 time bomb is a missed attack (needs a clock-shifting deep mode).
 - No real-install step, approval UI, MODIFY, cache or npm support (roadmap).
 - The benchmark is 6 simulated packages, 3 repeats. It demonstrates the mechanism, not real-world detection rates.
 - The split-screen "recording" is a replay assembled from real screenshots and terminal output, not a live screen
   capture; no screen recorder (ffmpeg, OBS, Chrome) was available.
-- The demo evidence (`demo_*`, GIF) was captured on commit `115b66d` plus docs/evidence only; the validation log is the
+- The demo evidence (`demo_*`, GIF) was captured on commit `115b66d`; the only later source change is the `regression_four_fixes.sh` helper; the validation log is the
   authoritative record of what was tested.
 - The CI workflow is untested until it runs on GitHub.
 - The registry allowlist governs the fetcher. The doctor's registry probe and the agent talk to fixed localhost

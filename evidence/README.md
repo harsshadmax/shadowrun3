@@ -9,13 +9,13 @@ Everything here was produced on this machine (Windows 11, WSL2 Ubuntu 24.04, Doc
 behaviour (documentation and the generated evidence are excluded). To verify:
 
 ```bash
-git checkout 115b66d933e7a19af6de92e2246e23875b8f4bfe
-bash scripts/source_hash.sh        # must print b40f2d4b552847be78b908d937d29bd6f8c1ce3c89d0af36461e22bec1e86539
+git checkout 6783e23ed84cebda7e62fb15a4e3f1a7a593f32b
+bash scripts/source_hash.sh        # must print 0da2af7ee8e9b549eda4572c0b5ae51888e14800c054ffff1e9aa370f4751d89
 bash scripts/validate.sh           # re-runs everything; refuses to run on a dirty tree
 ```
 
 `validate.sh` hashes the source before and after the run and fails if it changed, so a log cannot describe code that
-was edited while it ran. The only commits after `115b66d` change documentation and files under `evidence/` and
+was edited while it ran. The only commits after `6783e23` change documentation and files under `evidence/` and
 `eval/results/`. `.github/workflows/ci.yml` runs the same steps on GitHub-hosted Linux (not yet run at the time of
 writing, so it is not claimed to pass).
 
@@ -40,5 +40,5 @@ Chrome) is installed here, and a desktop recording could capture unrelated windo
 18:09:34 UTC). Every run in `demo_status.txt` lists that same id as the check that gated it, and the dashboard's header
 pill and Sandbox health panel show the same id and time.
 
-**Latency.** The numbers here include the cost of the sidecar tracer (median decision 5.4 s versus 2.6 s before); see
+**Latency.** The numbers here include the cost of the sidecar tracer (median decision 5.3 s versus 2.6 s before); see
 README section 9 for the breakdown.

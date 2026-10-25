@@ -1,4 +1,4 @@
 setup,attacks_prevented,attacks_total,false_positives,benign_total,leaked_tokens,median_ms,max_ms
 no_guard,0,3,0,3,3,,
 name_check,1,3,0,3,1,,
-shadowrun,2,3,0,3,0,5400.371190499982,5709.860489000221
+shadowrun,2,3,0,3,0,5313.24066849993,5710.427055000309
