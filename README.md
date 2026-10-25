@@ -11,7 +11,6 @@ runs the package inside a locked-down sandbox full of fake secrets, watches what
 > sink container inside an internal Docker network. Nothing touches a real host.
 
 [![CI](https://github.com/harsshadmax/shadowrun3/actions/workflows/ci.yml/badge.svg)](https://github.com/harsshadmax/shadowrun3/actions/workflows/ci.yml)
-![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 
 ## At a glance
