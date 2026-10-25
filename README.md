@@ -10,7 +10,7 @@ runs the package inside a locked-down sandbox full of fake secrets, watches what
 > Everything is a **simulation**: the packages, the agent and the secrets are fake, and payloads can only reach a
 > sink container inside an internal Docker network. Nothing touches a real host.
 
-[![CI](https://github.com/harsshadmax/shadowrun2.0/actions/workflows/ci.yml/badge.svg)](https://github.com/harsshadmax/shadowrun2.0/actions/workflows/ci.yml)
+[![CI](https://github.com/harsshadmax/shadowrun3/actions/workflows/ci.yml/badge.svg)](https://github.com/harsshadmax/shadowrun3/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 
@@ -59,8 +59,8 @@ of WSL. Docker Desktop with WSL integration enabled for Ubuntu also works and ne
 Keep it in your Linux home folder, not under `/mnt/c`:
 
 ```bash
-git clone -b security-fixes-and-redesign https://github.com/harsshadmax/shadowrun2.0.git ~/shadowrun2.0
-cd ~/shadowrun2.0
+git clone https://github.com/harsshadmax/shadowrun3.git ~/shadowrun3
+cd ~/shadowrun3
 ```
 
 **Step 4. Create the Python environment and install:**
@@ -120,7 +120,7 @@ Leave this terminal open. It prints nothing while it works.
 **To start again later:** open Ubuntu and run
 
 ```bash
-cd ~/shadowrun2.0 && source .venv/bin/activate
+cd ~/shadowrun3 && source .venv/bin/activate
 sudo service docker start      # not needed with Docker Desktop
 bash scripts/up.sh && python -m shadowrun.cli serve
 ```
@@ -570,7 +570,7 @@ GitHub Actions (`.github/workflows/ci.yml`) so anyone can reproduce them without
 ### Setup (Windows 11 + WSL2)
 
 The step-by-step version is the [Quick start](#quick-start-from-a-fresh-clone-to-the-dashboard) at the top. The repo
-must live in the WSL filesystem (`~/shadowrun2.0`), not under `/mnt/c`.
+must live in the WSL filesystem (`~/shadowrun3`), not under `/mnt/c`.
 
 ```bash
 # inside Ubuntu on WSL2
@@ -578,7 +578,7 @@ sudo apt-get update && sudo apt-get install -y docker.io python3-venv python3-pi
 sudo usermod -aG docker $USER      # then: wsl --shutdown (from PowerShell) and reopen Ubuntu
 sudo service docker start          # WSL without systemd needs this after each WSL restart
 
-git clone -b security-fixes-and-redesign https://github.com/harsshadmax/shadowrun2.0.git ~/shadowrun2.0 && cd ~/shadowrun2.0
+git clone https://github.com/harsshadmax/shadowrun3.git ~/shadowrun3 && cd ~/shadowrun3
 python3 -m venv .venv && . .venv/bin/activate
 pip install -e .
 bash scripts/vendor_assets.sh      # only if dashboard/static/vendor is missing (needs internet once)
