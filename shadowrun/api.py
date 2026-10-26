@@ -205,8 +205,11 @@ def sink_events(limit: int = 100):
     return {"events": events}
 
 
-def _agent_worker():
-    from agent.scripted_agent import AGENT_ID, run_task
+def _agent_worker(mode: str = "scripted", proposer=None):
+    if mode == "llm":
+        from agent.llm_agent import AGENT_ID, run_task
+    else:
+        from agent.scripted_agent import AGENT_ID, run_task
 
     def act(spec):
         return _run_gated(spec, AGENT_ID)
@@ -215,7 +218,10 @@ def _agent_worker():
         db.add_agent_event(AGENT_ID, run_id, kind, message)
 
     try:
-        run_task(act, log, workdir=config.DATA / "agent_workspace")
+        if mode == "llm":
+            run_task(act, log, workdir=config.DATA / "agent_workspace", proposer=proposer)
+        else:
+            run_task(act, log, workdir=config.DATA / "agent_workspace")
     except Exception as e:
         db.add_agent_event(AGENT_ID, None, "CONTINUE", f"Agent stopped with an error: {type(e).__name__}")
     finally:
@@ -223,12 +229,23 @@ def _agent_worker():
 
 
 @app.post(f"{API}/agent/run", dependencies=[Depends(need_token)])
-def agent_run():
+def agent_run(mode: str = "scripted"):
+    """mode=scripted (default, the simulated agent) or mode=llm (a Claude model proposes packages; needs
+    ANTHROPIC_API_KEY in the server's environment). The gate's decision is the same in both modes."""
+    if mode not in ("scripted", "llm"):
+        raise HTTPException(422, "mode must be 'scripted' or 'llm'")
     if AGENT_STATE["running"]:
         raise HTTPException(409, "Agent already running")
+    proposer = None
+    if mode == "llm":
+        from agent import llm_agent
+        try:
+            proposer = llm_agent.from_env()
+        except ValueError:
+            raise HTTPException(400, "mode=llm needs ANTHROPIC_API_KEY set in the server's environment")
     AGENT_STATE["running"] = True
-    threading.Thread(target=_agent_worker, daemon=True).start()
-    return JSONResponse({"started": True}, status_code=202)
+    threading.Thread(target=_agent_worker, args=(mode, proposer), daemon=True).start()
+    return JSONResponse({"started": True, "mode": mode}, status_code=202)
 
 
 @app.get(f"{API}/agent/events")

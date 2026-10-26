@@ -54,7 +54,7 @@ docker run --rm hello-world
 You should see "Hello from Docker!". (On WSL without systemd you need `sudo service docker start` after every restart
 of WSL. Docker Desktop with WSL integration enabled for Ubuntu also works and needs no `service` command.)
 
-**Step 3. Clone the repository.** The work is on the `security-fixes-and-redesign` branch (the repo has no `main` yet).
+**Step 3. Clone the repository.** The code is on the default `main` branch.
 Keep it in your Linux home folder, not under `/mnt/c`:
 
 ```bash
@@ -486,6 +486,31 @@ flowchart LR
     end
 ```
 
+### LLM agent mode (the model proposes, the gate decides)
+
+The default demo uses a scripted agent. There is also an LLM agent (`agent/llm_agent.py`) where a Claude model picks
+the package, reads the block reason, and writes the final module. Start it with a key in the server's environment:
+
+```bash
+export ANTHROPIC_API_KEY=...           # read from the environment only; never logged or stored
+python -m shadowrun.cli serve          # then, in another terminal:
+python -m agent.llm_agent              # or: POST /api/v1/agent/run?mode=llm
+```
+
+What the model can and cannot do:
+
+- It sees the task, a six-name catalog with one-line descriptions, and the gate's earlier verdicts. It never sees
+  traces, secrets or sandbox output.
+- It can only name a catalog package it has not tried. Anything else is rejected before the gate, and two
+  rejections stop the agent.
+- The verdict is never the model's to change. BLOCK and ESCALATE mean not installed, and an unreachable model means
+  nothing is installed.
+- The gate's reason text is treated as untrusted data: control characters removed, cut to 300 characters.
+- The generated module goes to one fixed file name, capped at 4,000 characters, and is never executed.
+
+This is covered by 21 tests that use a scripted stand-in for the model (`tests/test_llm_agent.py`). **It has not
+been run against the live API in the validation log**, so the real model's behaviour is unmeasured.
+
 ---
 
 ## 8. Audit trail
@@ -666,7 +691,7 @@ shadowrun/        sandbox, canary, monitor, detector, policy, fetcher, pipeline,
 sink/  docker/    sink service and the sandbox image
 packages/         simulated fixtures (src) and build_all.py
 policies/         default.yaml (rules, allowed paths, pip baseline)
-agent/            scripted_agent.py (SIMULATED)
+agent/            scripted_agent.py (SIMULATED), llm_agent.py (Claude proposes, the gate decides)
 eval/             baselines, run_eval, record_run, results/
 dashboard/        Jinja templates, CSS, JS, vendored htmx + Chart.js
 scripts/          up/down, vendor_assets, demo helpers
