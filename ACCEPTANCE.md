@@ -5,10 +5,10 @@ Checked on the dev machine (Windows 11, WSL2 Ubuntu 24.04, Docker Engine 29.1.3,
 
 | | |
 |---|---|
-| Commit tested | `6783e23ed84cebda7e62fb15a4e3f1a7a593f32b` (branch `security-fixes-and-redesign`) |
-| Source hash | `0da2af7ee8e9b549eda4572c0b5ae51888e14800c054ffff1e9aa370f4751d89` (`bash scripts/source_hash.sh` on that commit prints the same value; docs and generated evidence are excluded from it) |
+| Commit tested | `be683e3682e4d451b51fe0de6857fffea2a15556` (branch `main`) |
+| Source hash | `bd4eb1dbeabcdc52fe25d390410c53522a56417fd6a5b0700214d3defd801662` (`bash scripts/source_hash.sh` on that commit prints the same value; docs and generated evidence are excluded from it) |
 | Working tree | clean when the run started; source hash identical before and after the run |
-| Results | doctor 9/9 PASS, **287 tests passed, none skipped**, 3-repeat benchmark, audit chain OK over 626 entries |
+| Results | doctor 9/9 PASS, **308 tests passed, none skipped**, 3-repeat benchmark, audit chain OK over 146 entries |
 | Raw output | [`evidence/validation.log`](evidence/validation.log), re-runnable with `bash scripts/validate.sh` (refuses a dirty tree) |
 | Independent check | `.github/workflows/ci.yml` rebuilds the sandbox and runs doctor, the full suite (fails if any test is skipped) and the benchmark on GitHub. **It has not run yet**, so this file does not claim it passes |
 
@@ -26,7 +26,7 @@ Checked on the dev machine (Windows 11, WSL2 Ubuntu 24.04, Docker Engine 29.1.3,
 | 10 | M1 and M2 blocked with canary evidence; B1 to B3 allowed | PASS | e2e per manifest; benchmark matrix |
 | 11 | Time bomb slip reported honestly | PASS | M3 ALLOW in every run; stated in README, results notes and demo script |
 | 12 | Agent is blocked, switches package, finishes | PASS | `test_agent_blocked_then_switches_and_finishes`, `evidence/demo_run.txt` |
-| 13 | Audit chain verifies and a tamper is detected | PASS | `tests/test_audit.py`; `audit verify` OK over 626 entries (validation) and 486 (demo run) |
+| 13 | Audit chain verifies and a tamper is detected | PASS | `tests/test_audit.py`; `audit verify` OK over 146 entries (validation) and 486 (demo run) |
 | 14 | Dashboard works end to end; loading/empty/error states | PASS | 35 dashboard tests; redesign driven in the in-app browser (earlier session: 1440, 768, 375 px, no horizontal scroll). The Docker-down error path was exercised only through tests |
 | 15 | Templates are autoescaped (XSS test passes) | PASS | `test_untrusted_strings_are_escaped_everywhere`; no `innerHTML`, no inline handlers (tested) |
 | 16 | Benchmark table has counts, false positives, latency and the disclaimer | PASS | `eval/results/results.md`: no guard 0/3, name check 1/3, Shadow-Run 2/3 attacks stopped, 0/3 benign stopped |
@@ -38,6 +38,7 @@ Checked on the dev machine (Windows 11, WSL2 Ubuntu 24.04, Docker Engine 29.1.3,
 | 22 | **Review 1:** root tracer privileges reduced or documented | PASS, residual risk documented | package container: host uid, `CapEff = CapBnd = 0`, no root process. Tracer sidecar: root with **only** `SYS_PTRACE` (no `SETUID`/`SETGID`), no network, no host mounts. Container settings asserted in `test_container_privileges_are_what_the_design_says`. Root + `CAP_SYS_PTRACE` in a shared PID namespace remains a risk against kernel/runtime bugs (README section 4, `CLAUDE.md`, `sandbox.py`); rootless Docker or gVisor is roadmap |
 | 23 | **Review 2:** no unmonitored bypass syscalls | PASS, with stated limits | `tests/test_syscall_coverage.py` (43) and doctor check 9: `openat2`, `creat`, `sendto`, `linkat`, `memfd_create`, `execveat`, `io_uring_setup`, `mount` are recorded **and** detected inside the real sandbox. Not covered: read/write contents, `bind`, `socket` options, I/O through `io_uring` where the runtime allows it (Docker's default seccomp denied it here) |
 | 24 | **Review 3:** validation bound to the tested source | PASS | `scripts/validate.sh` refused a dirty tree (exit 2, shown in the session), records commit, tree hash and source hash before and after, and fails if the source changed. The old log's "1 uncommitted file" was the log file itself, created before the status check |
+| 25 | **LLM agent mode:** a model proposes, the gate decides | PASS (stand-in model only) | `tests/test_llm_agent.py` (21): catalog-only proposals, repeats and unknown names rejected before the gate, BLOCK/ESCALATE never installed, reason text sanitised against prompt injection, model never sees traces, unreachable model installs nothing, API key only in the request header. **Not run against the live API**, so the real model's behaviour is unmeasured |
 
 Targeted regression run: [`evidence/regression_four_fixes.txt`](evidence/regression_four_fixes.txt).
 Fresh demo with one consistent state: [`evidence/demo_status.txt`](evidence/demo_status.txt) (doctor check `#bab2caf9c9`
@@ -46,7 +47,7 @@ real captures).
 
 ## Known gaps
 
-- **Latency doubled:** median decision 2.6 s to 5.3 s (max 5.7 s), because `strace --seccomp-bpf` is refused when
+- **Latency doubled:** median decision 2.6 s to 6.7 s (max 7.5 s; an earlier run on the same laptop measured 5.3 s, so expect run-to-run variation), because `strace --seccomp-bpf` is refused when
   attaching to a running process. Breakdown in README section 9.
 - M3 time bomb is a missed attack (needs a clock-shifting deep mode).
 - No real-install step, approval UI, MODIFY, cache or npm support (roadmap).
